@@ -1,0 +1,2 @@
+date,symbol,side,entry,stop,take_profit,risk_r,profit_r,rule_respected
+2026-01-14T23:59:41.607765,string,string,0.0,0.0,0.0,0.0,0.0,True
