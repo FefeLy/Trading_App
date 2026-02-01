@@ -1,0 +1,16 @@
+MAX_RISK_PCT = 0.01        # 1% máximo
+BASE_RISK_PCT = 0.005     # 0.5% por trade
+MIN_RISK_PCT = 0.0025     # 0.25% mínimo
+
+R_TARGET = 2.0            # 2R por defecto
+DD_SOFT = 0.10            # 10% drawdown suaviza riesgo
+DD_HARD = 0.20            # 20% drawdown corta riesgo
+
+BASE_RISK_PCT = 0.005      # 0.5% por trade
+MIN_RISK_PCT = 0.0025     # 0.25%
+MAX_RISK_PCT = 0.01       # 1%
+
+R_TARGET = 2.0
+
+DD_SOFT = 0.10             # 10%
+DD_HARD = 0.20             # 20%
