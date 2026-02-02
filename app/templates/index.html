@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <title>SIGNAL CORE</title>
+
+  <!-- iPhone PWA Support -->
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SIGNAL CORE" />
+  <link rel="apple-touch-icon" href="/static/icon-192.png" />
+
+  <!-- Manifest -->
+  <link rel="manifest" href="/static/manifest.json" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f172a;
+      --card:#111c33;
+      --border:#1e2b4d;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --accent:#38bdf8;
+      --danger:#fb7185;
+      --ok:#22c55e;
+      --warn:#fbbf24;
+      --radius:14px;
+      --pad:16px;
+    }
+
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: radial-gradient(1000px 600px at 20% 10%, rgba(56,189,248,.15), transparent 60%),
+                  radial-gradient(800px 400px at 80% 40%, rgba(34,197,94,.10), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      padding:18px;
+    }
+
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      margin-bottom:14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:baseline;
+      gap:12px;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:1px;
+      color:var(--accent);
+      font-weight:800;
+    }
+
+    .brand small{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap:14px;
+    }
+
+    @media (max-width: 900px){
+      .grid{ grid-template-columns:1fr; }
+      body{ padding:14px; }
+    }
+
+    .card{
+      background: rgba(17,28,51,.85);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--pad);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+
+    .card h2{
+      margin:0 0 12px 0;
+      font-size:14px;
+      color:#cbd5e1;
+      letter-spacing:.4px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+
+    .pill{
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      color:#cbd5e1;
+      background: rgba(15,23,42,.6);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    label{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    select, input{
+      background:#0b1220;
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px 12px;
+      font-size:14px;
+      outline:none;
+      min-width: 140px;
+    }
+
+    input{ min-width: 220px; }
+
+    button{
+      background: linear-gradient(180deg, rgba(56,189,248,1), rgba(56,189,248,.75));
+      color:#001018;
+      border:none;
+      padding:10px 14px;
+      border-radius:12px;
+      font-weight:800;
+      cursor:pointer;
+      font-size:14px;
+      box-shadow: 0 8px 16px rgba(56,189,248,.22);
+    }
+
+    button:active{ transform: translateY(1px); }
+
+    pre{
+      background:#0b1220;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      overflow:auto;
+      margin:0;
+      color:#d1d5db;
+      font-size:12px;
+      line-height:1.4;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .bigSignal{
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:.5px;
+    }
+
+    .signalBUY{ color: var(--ok); }
+    .signalSELL{ color: var(--danger); }
+    .signalHOLD{ color: var(--warn); }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    th, td{
+      border-bottom:1px solid var(--border);
+      padding:10px 8px;
+      text-align:left;
+    }
+    th{ color:#93c5fd; font-size:12px; font-weight:800; }
+    tr:hover td{ background: rgba(56,189,248,.05); }
+
+    .muted{ color: var(--muted); }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>🚀 SIGNAL CORE</h1>
+      <small>Cyber Trading Terminal</small>
+    </div>
+
+    <div class="row">
+      <button onclick="refreshAll()">Refresh</button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT -->
+    <div class="card">
+      <h2>⚙️ Controls <span class="pill">Market</span></h2>
+
+      <div class="row">
+        <div>
+          <label>Timeframe</label><br/>
+          <select id="timeframe">
+            <option value="15m">15m</option>
+            <option value="1h" selected>1h</option>
+            <option value="4h">4h</option>
+            <option value="1d">1d</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Universe</label><br/>
+          <select id="universe_size">
+            <option value="20">20</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Top Results</label><br/>
+          <select id="top_n">
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="card">
+      <h2>📡 System Status <span class="pill">health</span></h2>
+      <pre id="health">Loading...</pre>
+    </div>
+
+    <!-- Manual Pair Check -->
+    <div class="card">
+      <h2>🔎 Manual Pair Check <span class="pill">probabilidad individual</span></h2>
+
+      <div class="row">
+        <input id="manual_pair" placeholder="BTCUSDT / ETHUSDT / SOLUSDT..." />
+        <button onclick="manualCheck()">Check</button>
+      </div>
+
+      <pre id="manual_out">Type a pair and press Check...</pre>
+    </div>
+
+    <!-- Telemetry -->
+    <div class="card">
+      <h2>📡 Communication / Telemetry <span class="pill">debug</span></h2>
+      <pre id="telemetry_out">{}</pre>
+    </div>
+
+    <!-- Primary Signal -->
+    <div class="card">
+      <h2>🎯 Primary Signal <span id="signalBadge" class="pill">HOLD</span></h2>
+      <pre id="primary_out">WAIT
+Scanning Binance universe...</pre>
+    </div>
+
+    <!-- Scanner -->
+    <div class="card">
+      <h2>📈 Scanner Top (results)</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Pair</th>
+            <th>Signal</th>
+            <th>Probability</th>
+          </tr>
+        </thead>
+        <tbody id="scannerBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+<script>
+  function safeNumber(x, fallback = 0){
+    const n = Number(x);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  function unwrapPayload(data){
+    return (data && data.results) ? data.results : data;
+  }
+
+  function setBadge(signal){
+    const badge = document.getElementById("signalBadge");
+    badge.textContent = signal || "HOLD";
+    badge.classList.remove("signalBUY","signalSELL","signalHOLD");
+    if(signal === "BUY") badge.classList.add("signalBUY");
+    else if(signal === "SELL") badge.classList.add("signalSELL");
+    else badge.classList.add("signalHOLD");
+  }
+
+  async function loadHealth(){
+    try{
+      const res = await fetch("/health", { cache:"no-store" });
+      const data = await res.json();
+      document.getElementById("health").textContent = JSON.stringify(data, null, 2);
+    }catch(e){
+      document.getElementById("health").textContent = "Health error";
+    }
+  }
+
+  async function loadScan(){
+    const timeframe = document.getElementById("timeframe").value;
+    const universe_size = document.getElementById("universe_size").value;
+    const top_n = document.getElementById("top_n").value;
+
+    // UI pre-state
+    document.getElementById("primary_out").textContent = "WAIT\nScanning Binance universe...";
+    setBadge("HOLD");
+
+    try{
+      const res = await fetch(`/scan?timeframe=${encodeURIComponent(timeframe)}&universe_size=${encodeURIComponent(universe_size)}&top_n=${encodeURIComponent(top_n)}`, {
+        cache:"no-store"
+      });
+
+      const raw = await res.json();
+      const data = unwrapPayload(raw);
+
+      // telemetry
+      const telem = data.telemetry || {};
+      document.getElementById("telemetry_out").textContent = JSON.stringify(telem, null, 2);
+
+      // primary
+      const primary = data.primary_signal || null;
+
+      if(primary && primary.signal){
+        const prob = safeNumber(primary.probability, safeNumber(primary.score, 0));
+        const pct = (prob * 100).toFixed(2);
+
+        setBadge(primary.signal);
+
+        let txt =
+          `Signal: ${primary.signal}\n` +
+          `Pair: ${primary.symbol || "N/A"}\n` +
+          `Probability: ${pct}%\n`;
+
+        if(primary.entry != null) txt += `Entry: ${primary.entry}\n`;
+        if(primary.stop != null) txt += `Stop: ${primary.stop}\n`;
+        if(primary.take_profit != null) txt += `Take Profit: ${primary.take_profit}\n`;
+        if(primary.reason) txt += `Reason: ${primary.reason}\n`;
+
+        document.getElementById("primary_out").textContent = txt;
+      } else {
+        document.getElementById("primary_out").textContent =
+          `HOLD\nNo opportunities found\n(reason: missing primary_signal)`;
+      }
+
+      // scanner table
+      const tbody = document.getElementById("scannerBody");
+      tbody.innerHTML = "";
+
+      const list = data.results || [];
+      if(!list.length){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="4" class="muted">No opportunities found</td>`;
+        tbody.appendChild(tr);
+        return;
+      }
+
+      list.forEach((s, i) => {
+        const prob = safeNumber(s.probability, safeNumber(s.score, 0));
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${i+1}</td>
+          <td>${s.symbol || "-"}</td>
+          <td>${s.signal || "HOLD"}</td>
+          <td>${(prob * 100).toFixed(1)}%</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+    }catch(e){
+      document.getElementById("primary_out").textContent =
+        "ERROR\nScanner failed. Check backend logs.";
+      document.getElementById("telemetry_out").textContent =
+        JSON.stringify({ error: String(e) }, null, 2);
+    }
+  }
+
+  async function manualCheck(){
+    const pair = document.getElementById("manual_pair").value.trim().toUpperCase();
+    const timeframe = document.getElementById("timeframe").value;
+
+    if(!pair){
+      document.getElementById("manual_out").textContent = "Type a pair first (ex: BTCUSDT)";
+      return;
+    }
+
+    document.getElementById("manual_out").textContent = "Checking...";
+
+    try{
+      const res = await fetch(`/signal?symbol=${encodeURIComponent(pair)}&timeframe=${encodeURIComponent(timeframe)}`, {
+        cache:"no-store"
+      });
+      const data = await res.json();
+
+      const prob = safeNumber(data.probability, safeNumber(data.score, 0));
+      const pct = (prob * 100).toFixed(2);
+
+      let txt =
+        `Symbol: ${data.symbol || pair}\n` +
+        `Timeframe: ${data.timeframe || timeframe}\n` +
+        `Signal: ${data.signal || "HOLD"}\n` +
+        `Probability: ${pct}%\n`;
+
+      if(data.entry != null) txt += `Entry: ${data.entry}\n`;
+      if(data.stop != null) txt += `Stop: ${data.stop}\n`;
+      if(data.take_profit != null) txt += `Take Profit: ${data.take_profit}\n`;
+      if(data.reason) txt += `Reason: ${data.reason}\n`;
+
+      document.getElementById("manual_out").textContent = txt;
+
+    }catch(e){
+      document.getElementById("manual_out").textContent =
+        "Manual check error: " + String(e);
+    }
+  }
+
+  function refreshAll(){
+    loadHealth();
+    loadScan();
+  }
+
+  // INIT
+  loadHealth();
+  loadScan();
+
+  // refresh timers
+  setInterval(loadHealth, 30000);
+  setInterval(loadScan, 45000);
+</script>
+
+</body>
+</html>
